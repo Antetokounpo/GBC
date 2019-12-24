@@ -29,25 +29,69 @@ void GBC::execute(uint8_t opcode)
             // TODO STOP
             break;
         case 0x22: /* ldi (HL), A */
-            ld(HL.p, *A);
+            ld(memory[HL.p], *A);
             HL.p++;
             pc++;break;
         case 0x2A: /* ldi A, (HL) */
-            ld(*A, HL.p);
+            ld(*A, memory[HL.p]);
             HL.p++;
             pc++;break;
         case 0x32: /* ldd (HL), A */
-            ld(HL.p, *A);
+            ld(memory[HL.p], *A);
             HL.p--;
             pc++;break;
         case 0x3A: /* ldd A, (HL) */
-            ld(*A, HL.p);
+            ld(*A, memory[HL.p]);
             HL.p--;
             pc++;break;
         case 0xD3: /* - */
             break;
         case 0xD9: /* reti */
             // TODO RETI
+            break;
+        case 0xDB: /* - */
+            break;
+        case 0xDD: /* - */
+            break;
+        case 0xE0: /* ld (FF00+n), A */
+            ld(memory[0xFF00+get_operand(1)], *A);
+            pc += 2; break;
+        case 0xE2: /* ld (FF00+C), A */
+            ld(memory[0xFF00+(*C)], *A);
+            pc++; break;
+        case 0xE3: /* - */
+            break;
+        case 0xE4: /* - */
+            break;
+        case 0xE8: /* add sp, dd */
+            add(sp, (int8_t)get_operand(1));
+            pc += 2; break;
+        case 0xEA: /* ld (nn), A */
+            ld(memory[get_operand(2)], *A);
+            pc += 3; break;
+        case 0xEB: /* - */
+            break;
+        case 0xEC: /* - */
+            break;
+        case 0xED: /* - */
+            break;
+        case 0xF0: /* ld A, (FF00+n) */
+            ld(*A, memory[0xFF00+get_operand(1)]);
+            pc += 2; break;
+        case 0xF2: /* ld A, (FF00+C) */
+            ld(*A, memory[0xFF00+(*C)]);
+            pc++; break;
+        case 0xF4: /* - */
+            break;
+        case 0xF8: /* ld HL, sp+dd */
+            ld(HL.p, sp+(int8_t)get_operand(1));
+            pc += 2; break;
+        case 0xFA: /* ld A, (nn) */
+            ld(*A, memory[get_operand(2)]);
+            pc += 3; break;
+        case 0xFC:
+            break;
+        case 0xFD:
             break;
     }
 }
