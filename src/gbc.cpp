@@ -30,5 +30,24 @@ void GBC::execute(uint8_t opcode)
             break;
         case 0x22: /* ldi (HL), A */
             ld(HL.p, *A);
+            HL.p++;
+            pc++;break;
+        case 0x2A: /* ldi A, (HL) */
+            ld(*A, HL.p);
+            HL.p++;
+            pc++;break;
+        case 0x32: /* ldd (HL), A */
+            ld(HL.p, *A);
+            HL.p--;
+            pc++;break;
+        case 0x3A: /* ldd A, (HL) */
+            ld(*A, HL.p);
+            HL.p--;
+            pc++;break;
+        case 0xD3: /* - */
+            break;
+        case 0xD9: /* reti */
+            // TODO RETI
+            break;
     }
 }
