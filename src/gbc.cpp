@@ -93,5 +93,31 @@ void GBC::execute(uint8_t opcode)
             break;
         case 0xFD:
             break;
+        case 0xCB:
+            interpret_bits(opcode);
+            pc++; break;
+        default:
+            Z80::execute(opcode);
+            break;
+    }
+}
+
+void GBC::interpret_bits(uint8_t opcode)
+{
+    uint8_t* registers[] = {B, C, D, E, H, L, &(memory[HL.p]), A};
+
+    uint8_t high_nibble = opcode >> 4;
+    uint8_t low_nibble = opcode & 0xF;
+
+    uint8_t& r = *(registers[low_nibble - 0x8]);
+
+    switch(high_nibble)
+    {
+        case 0x3:
+            r = (r << 4) + (r >> 4);
+            break;
+        default:
+            Z80::interpret_bits(opcode);
+            break;
     }
 }

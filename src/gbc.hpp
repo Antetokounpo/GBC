@@ -7,4 +7,5 @@ class GBC : public Z80::Z80
         void step();
     protected:
         void execute(uint8_t opcode);
+        void interpret_bits(uint8_t opcode);
 };
