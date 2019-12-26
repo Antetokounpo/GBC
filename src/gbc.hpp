@@ -3,6 +3,8 @@
 class GBC : public Z80::Z80
 {
     public:
+        GBC(){}
+        ~GBC(){}
         bool load(const char* filename);
         void step();
     protected:

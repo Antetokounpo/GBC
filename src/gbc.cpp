@@ -1,3 +1,5 @@
+#include<cstring>
+
 #include "gbc.hpp"
 
 bool GBC::load(const char* filename)
@@ -64,7 +66,7 @@ void GBC::execute(uint8_t opcode)
         case 0xE4: /* - */
             break;
         case 0xE8: /* add sp, dd */
-            add(sp, (int8_t)get_operand(1));
+            add(sp, twoscomp(get_operand(1)));
             pc += 2; break;
         case 0xEA: /* ld (nn), A */
             ld(memory[get_operand(2)], *A);
@@ -84,7 +86,7 @@ void GBC::execute(uint8_t opcode)
         case 0xF4: /* - */
             break;
         case 0xF8: /* ld HL, sp+dd */
-            ld(HL.p, sp+(int8_t)get_operand(1));
+            ld(HL.p, sp+twoscomp(get_operand(1)));
             pc += 2; break;
         case 0xFA: /* ld A, (nn) */
             ld(*A, memory[get_operand(2)]);
