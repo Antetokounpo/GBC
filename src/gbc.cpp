@@ -1,14 +1,33 @@
 #include<cstring>
+#include<iostream>
 
 #include "gbc.hpp"
+#include "cartridge.hpp"
+
+GBC::GBC() {}
+
+GBC::~GBC()
+{
+    delete cartridge;
+}
 
 bool GBC::load(const char* filename)
 {
     if(!Z80::load(filename)) // function from parent class
         return false;
 
-    std::memmove(memory + 0, rom + 0, 0x3FFF); /* 16KB ROM bank 00 */
-    std::memmove(memory + 0x4000, rom + 0x4000, 0x3FFF); /* 16KB ROM bank 01~NN */
+    cartridge = new Cartridge(rom , rom_size);
+
+    if(!cartridge->checksum())
+    {
+        std::cout << "Checksum failed\n";
+        return false;
+    }
+
+    std::cout << cartridge->title() << std::endl;
+
+    std::memcpy(memory + 0, rom + 0, 0x3FFF); /* 16KB ROM bank 00 */
+    std::memcpy(memory + 0x4000, rom + 0x4000, 0x3FFF); /* 16KB ROM bank 01~NN */
 
     return true;
 }
@@ -49,7 +68,8 @@ void GBC::execute(uint8_t opcode)
         case 0xD3: /* - */
             break;
         case 0xD9: /* reti */
-            // TODO RETI
+            ei();
+            pop(pc);
             break;
         case 0xDB: /* - */
             break;
