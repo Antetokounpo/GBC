@@ -10,7 +10,8 @@ class GBC : public Z80::Z80
         GBC();
         ~GBC();
         bool load(const char* filename);
-        void step();
+        uint8_t fetch();
+        uint8_t fetch(int offset);
     protected:
         void execute(uint8_t opcode);
         void interpret_bits(uint8_t opcode);

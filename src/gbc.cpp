@@ -32,11 +32,9 @@ bool GBC::load(const char* filename)
     return true;
 }
 
-void GBC::step()
+uint8_t GBC::fetch(int offset)
 {
-    uint8_t opcode;
-    opcode = memory[pc];
-    execute(opcode);
+    return memory[pc+offset];
 }
 
 void GBC::execute(uint8_t opcode)

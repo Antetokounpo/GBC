@@ -12,7 +12,16 @@ int main(int argc, char** argv)
 
     GBC cpu;
 
-    cpu.load(argv[1]);
+    if(!cpu.load(argv[1]))
+        return -1;
+
+    bool quit = false;
+
+    while(!quit)
+    {
+        cpu.step();
+    }
+
 
     return 0;
 }
