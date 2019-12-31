@@ -10,7 +10,8 @@ $(ODIR)/%.o: %.cpp $(DEPS)
 	@mkdir -p $(@D)
 	$(CC) -c -o $@ $< -Wall
 
-gbemu: $(OBJ)
+dist/gbemu: $(OBJ)
+	@mkdir -p $(@D)
 	$(CC) -o $@ $^
 
 .PHONY: clean
