@@ -20,8 +20,8 @@ int main(int argc, char** argv)
     while(!quit)
     {
         cpu.step();
+        std::cout << "Frame!" << std::endl;
     }
-
 
     return 0;
 }
