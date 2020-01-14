@@ -1,3 +1,6 @@
+#ifndef PPU_H
+#define PPU_H
+
 #include<cstdint>
 
 #include<SDL2/SDL.h>
@@ -5,11 +8,15 @@
 class PPU
 {
     public:
-        PPU();
+        PPU(SDL_Renderer* r, uint8_t* m);
         ~PPU();
-        //get_frame();
+        SDL_Texture* get_background();
         void update();
-        void refresh_memory(uint8_t* memory);
     private:
+        SDL_Renderer* renderer;
+        SDL_Texture* background;
 
+        uint8_t* memory;
 };
+
+#endif

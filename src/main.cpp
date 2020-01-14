@@ -12,11 +12,12 @@ int main(int argc, char** argv)
         return -1;
     }
 
-    GBC cpu;
     if(SDL_Init(SDL_INIT_VIDEO) < 0)
         return -1;
-    SDL_Window* window = SDL_CreateWindow("gbemu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 576, NULL);
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, NULL);
+
+    SDL_Window* window = SDL_CreateWindow("gbemu", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 576, SDL_WINDOW_SHOWN);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    GBC cpu(renderer);
 
     if(!cpu.load(argv[1]))
         return -1;
@@ -32,9 +33,17 @@ int main(int argc, char** argv)
                 quit = true;
         }
 
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+        SDL_RenderClear(renderer);
+
         cpu.step();
-        std::cout << "Frame!" << std::endl;
+        cpu.get_frame();
+        SDL_RenderPresent(renderer);
     }
+
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    SDL_Quit();
 
     return 0;
 }

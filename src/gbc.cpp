@@ -1,14 +1,21 @@
 #include<cstring>
 #include<iostream>
 
+#include<SDL2/SDL.h>
+
 #include "gbc.hpp"
 #include "cartridge.hpp"
+#include "ppu.hpp"
 
-GBC::GBC() {}
+GBC::GBC(SDL_Renderer* r)
+{
+    ppu = new PPU(r, memory);
+}
 
 GBC::~GBC()
 {
     delete cartridge;
+    delete ppu;
 }
 
 bool GBC::load(const char* filename)
@@ -35,6 +42,11 @@ bool GBC::load(const char* filename)
 uint8_t GBC::fetch(int offset)
 {
     return memory[pc+offset];
+}
+
+void GBC::get_frame()
+{
+    ppu->update();
 }
 
 void GBC::execute(uint8_t opcode)

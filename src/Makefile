@@ -1,10 +1,10 @@
 CC=g++
-DEPS = Z80/z80.hpp gbc.hpp cartridge.hpp
+DEPS = Z80/z80.hpp gbc.hpp cartridge.hpp ppu.hpp
 CFLAGS=-Wall
 
 ODIR=obj
 
-_OBJ = Z80/z80.o main.o gbc.o cartridge.o
+_OBJ = Z80/z80.o main.o gbc.o cartridge.o ppu.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lSDL2
