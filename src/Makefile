@@ -1,18 +1,21 @@
 CC=g++
 DEPS = Z80/z80.hpp gbc.hpp cartridge.hpp
+CFLAGS=-Wall
 
 ODIR=obj
 
 _OBJ = Z80/z80.o main.o gbc.o cartridge.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
+LIBS=-lSDL2
+
 $(ODIR)/%.o: %.cpp $(DEPS)
 	@mkdir -p $(@D)
-	$(CC) -c -o $@ $< -Wall
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 dist/gbemu: $(OBJ)
 	@mkdir -p $(@D)
-	$(CC) -o $@ $^
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
 

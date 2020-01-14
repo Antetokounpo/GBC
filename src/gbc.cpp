@@ -114,12 +114,15 @@ void GBC::execute(uint8_t opcode)
         case 0xFD:
             break;
         case 0xCB:
-            interpret_bits(opcode);
+            pc++;
+            interpret_bits(fetch(0));
             pc++; break;
         default:
             Z80::execute(opcode);
             break;
     }
+
+    interrupt_handler();
 }
 
 void GBC::interpret_bits(uint8_t opcode)
@@ -134,10 +137,47 @@ void GBC::interpret_bits(uint8_t opcode)
     switch(high_nibble)
     {
         case 0x3:
+            cycles += (low_nibble == 0x6) ? 15 : 8;
             r = (r << 4) + (r >> 4);
             break;
         default:
             Z80::interpret_bits(opcode);
             break;
     }
+}
+
+void GBC::interrupt_handler()
+{
+    if(!iff1)
+        return;
+
+    for(int i = 0; i<5; ++i)
+    {
+        if(memory[0xFFFF] & (0x1 << i))
+        {
+            cycles += 20;
+            push(pc);
+            iff1 = false;
+
+            switch(i)
+            {
+                case 0: /* V-Blank */
+                    pc = 0x40;
+                    break;
+                case 1: /* LCD STAT */
+                    pc = 0x48;
+                    break;
+                case 2: /* Timer */
+                    pc = 0x50;
+                    break;
+                case 3: /* Serial */
+                    pc = 0x58;
+                    break;
+                case 4: /* Joypad */
+                    pc = 0x60;
+                    break;
+            }
+        }
+    }
+
 }

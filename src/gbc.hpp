@@ -15,6 +15,7 @@ class GBC : public Z80::Z80
     protected:
         void execute(uint8_t opcode);
         void interpret_bits(uint8_t opcode);
+        void interrupt_handler();
 
         Cartridge* cartridge;        
 };
