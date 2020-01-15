@@ -12,6 +12,8 @@
 GBC::GBC(SDL_Renderer* r)
 {
     ppu = new PPU(r, memory);
+    cartridge = 0; /* Empêche de free de la mémoire non-allouée */
+
     t = std::chrono::steady_clock::now();
 }
 
@@ -63,88 +65,99 @@ void GBC::execute(uint8_t opcode)
         std::cout << "Flags: " << x << std::endl;
         std::cout << std::hex << "A: " << (uint)(*A) << "\tB: " << (uint)(*B) << "\tH: " << uint(*H) << "\tL: " << uint(*L) << std::endl;
         std::cout << std::hex << "args: " << get_operand(2) << std::endl;
-        //if(getchar() == 'q')
-        //    exit(0);
+        std::cout << std::endl;
+        #ifdef GBC_STEP
+            if(getchar() == 'q')
+                exit(0);
+        #endif
     #endif
 
     switch(opcode)
     {
         case 0x08:
+            cycles += 20;
             ld(memory[get_operand(2)], sp);
             pc += 3; break;
         case 0x10:
             // TODO STOP
             break;
         case 0x22: /* ldi (HL), A */
+            cycles += 8;
             ld(memory[HL.p], *A);
             HL.p++;
             pc++;break;
         case 0x2A: /* ldi A, (HL) */
+            cycles += 8;
             ld(*A, memory[HL.p]);
             HL.p++;
             pc++; break;
         case 0x32: /* ldd (HL), A */
+            cycles += 8;
             ld(memory[HL.p], *A);
             HL.p--;
             pc++; break;
         case 0x3A: /* ldd A, (HL) */
+            cycles += 8;
             ld(*A, memory[HL.p]);
             HL.p--;
             pc++; break;
-        case 0xD3: /* - */
-            break;
         case 0xD9: /* reti */
+            cycles += 16;
             ei();
             pop(pc);
             break;
-        case 0xDB: /* - */
-            break;
-        case 0xDD: /* - */
-            break;
         case 0xE0: /* ld (FF00+n), A */
+            cycles += 12;
             ld(memory[0xFF00+get_operand(1)], *A);
             pc += 2; break;
         case 0xE2: /* ld (FF00+C), A */
+            cycles += 8;
             ld(memory[0xFF00+(*C)], *A);
             pc++; break;
-        case 0xE3: /* - */
-            break;
-        case 0xE4: /* - */
-            break;
         case 0xE8: /* add sp, dd */
+            cycles += 16;
             add(sp, twoscomp(get_operand(1)));
             pc += 2; break;
         case 0xEA: /* ld (nn), A */
+            cycles += 16;
             ld(memory[get_operand(2)], *A);
             pc += 3; break;
-        case 0xEB: /* - */
-            break;
-        case 0xEC: /* - */
-            break;
-        case 0xED: /* - */
-            break;
         case 0xF0: /* ld A, (FF00+n) */
+            cycles += 12;
             ld(*A, memory[0xFF00+get_operand(1)]);
             pc += 2; break;
         case 0xF2: /* ld A, (FF00+C) */
+            cycles += 8;
             ld(*A, memory[0xFF00+(*C)]);
             pc++; break;
-        case 0xF4: /* - */
-            break;
         case 0xF8: /* ld HL, sp+dd */
+            cycles += 12;
             ld(HL.p, sp+twoscomp(get_operand(1)));
             pc += 2; break;
         case 0xFA: /* ld A, (nn) */
+            cycles += 16;
             ld(*A, memory[get_operand(2)]);
             pc += 3; break;
-        case 0xFC:
-            break;
-        case 0xFD:
-            break;
         case 0xCB:
             pc++;
-            interpret_bits(fetch(0));
+            interpret_bits(fetch(0)); /* Cycle incrementation inside of function */
             pc++; break;
+
+        case 0xD3:
+        case 0xD8:
+        case 0xDD:
+        case 0xE3:
+        case 0xE4:
+        case 0xEB:
+        case 0xEC:
+        case 0xED:
+        case 0xF4:
+        case 0xFC:
+        case 0xFD:
+            std::cout << "Invalid GMB opcode\n" << std::endl;
+            exit(EXIT_FAILURE);
+            break;
+
         default:
             Z80::execute(opcode);
             break;

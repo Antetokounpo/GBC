@@ -19,11 +19,11 @@ int main(int argc, char** argv)
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     GBC cpu(renderer);
 
-    if(!cpu.load(argv[1]))
-        return -1;
-
     bool quit = false;
     SDL_Event e;
+
+    if(!cpu.load(argv[1]))
+        return -1;
 
     while(!quit)
     {
@@ -38,6 +38,7 @@ int main(int argc, char** argv)
 
         cpu.step();
         cpu.get_frame();
+
         SDL_RenderPresent(renderer);
     }
 
