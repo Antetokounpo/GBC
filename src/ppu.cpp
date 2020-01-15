@@ -36,7 +36,6 @@ SDL_Texture* PPU::get_background()
     for(int i = 0; i<16; ++i)
     {
         uint8_t b = memory[0x8000+i];
-        std::cout << (uint)b << std::endl;
         for(int j = 0; j<4; ++j)
         {
             switch(b >> (2*j) & 0x3)

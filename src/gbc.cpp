@@ -1,5 +1,7 @@
 #include<cstring>
 #include<iostream>
+#include<bitset>
+#include<chrono>
 
 #include<SDL2/SDL.h>
 
@@ -10,6 +12,7 @@
 GBC::GBC(SDL_Renderer* r)
 {
     ppu = new PPU(r, memory);
+    t = std::chrono::steady_clock::now();
 }
 
 GBC::~GBC()
@@ -36,6 +39,8 @@ bool GBC::load(const char* filename)
     std::memcpy(memory + 0, rom + 0, 0x3FFF); /* 16KB ROM bank 00 */
     std::memcpy(memory + 0x4000, rom + 0x4000, 0x3FFF); /* 16KB ROM bank 01~NN */
 
+    pc = 0x100;
+
     return true;
 }
 
@@ -51,6 +56,17 @@ void GBC::get_frame()
 
 void GBC::execute(uint8_t opcode)
 {
+    #ifdef GBC_DEBUG
+	    std::cout << std::hex << "PC: " << (uint)pc << std::endl;
+        std::cout << std::hex << "opcode: " << (uint)opcode << std::endl;
+        std::bitset<8> x(*F);
+        std::cout << "Flags: " << x << std::endl;
+        std::cout << std::hex << "A: " << (uint)(*A) << "\tB: " << (uint)(*B) << "\tH: " << uint(*H) << "\tL: " << uint(*L) << std::endl;
+        std::cout << std::hex << "args: " << get_operand(2) << std::endl;
+        //if(getchar() == 'q')
+        //    exit(0);
+    #endif
+
     switch(opcode)
     {
         case 0x08:
@@ -66,15 +82,15 @@ void GBC::execute(uint8_t opcode)
         case 0x2A: /* ldi A, (HL) */
             ld(*A, memory[HL.p]);
             HL.p++;
-            pc++;break;
+            pc++; break;
         case 0x32: /* ldd (HL), A */
             ld(memory[HL.p], *A);
             HL.p--;
-            pc++;break;
+            pc++; break;
         case 0x3A: /* ldd A, (HL) */
             ld(*A, memory[HL.p]);
             HL.p--;
-            pc++;break;
+            pc++; break;
         case 0xD3: /* - */
             break;
         case 0xD9: /* reti */
@@ -134,6 +150,7 @@ void GBC::execute(uint8_t opcode)
             break;
     }
 
+    timing();
     interrupt_handler();
 }
 
@@ -191,5 +208,46 @@ void GBC::interrupt_handler()
             }
         }
     }
+
+}
+
+void GBC::timing()
+{
+    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - t);
+    
+    if(time_span >= std::chrono::microseconds(1000000/16384))
+        memory[0xFF04] += 1; /* DIV - Divider Register */
+    if(memory[0xFF07] & (0x1 << 2))
+    {
+        int clock;
+        switch(memory[0xFF07] & 0x3)
+        {
+            case 0x0:
+                clock = 4096;
+                break;
+            case 0x1:
+                clock = 262144;
+                break;
+            case 0x2:
+                clock = 65536;
+                break;
+            case 0x3:
+                clock = 16384;
+                break;
+        }
+
+        if(time_span >= std::chrono::microseconds(1000000/clock))
+        {
+            if(memory[0xFF05] == 0xFF)
+            {
+                memory[0xFF05] = memory[0xFF06];
+                // request interrupt TODO
+            }
+            else
+                memory[0xFF05] += 1;
+        }
+    }
+    
+
 
 }

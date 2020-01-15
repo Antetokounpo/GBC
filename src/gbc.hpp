@@ -1,6 +1,8 @@
 #ifndef GBC_H
 #define GBC_H
 
+#include<chrono>
+
 #include <SDL2/SDL.h>
 
 #include "Z80/z80.hpp"
@@ -16,13 +18,16 @@ class GBC : public Z80::Z80
         uint8_t fetch();
         uint8_t fetch(int offset);
         void get_frame();
-    protected:
+    private:
         void execute(uint8_t opcode);
         void interpret_bits(uint8_t opcode);
         void interrupt_handler();
+        void timing();
 
         Cartridge* cartridge;
         PPU* ppu;
+
+        std::chrono::steady_clock::time_point t;
 };
 
 #endif
