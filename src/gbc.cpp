@@ -59,7 +59,7 @@ void GBC::get_frame()
 void GBC::execute(uint8_t opcode)
 {
     #ifdef GBC_DEBUG
-	    std::cout << std::hex << "PC: " << (uint)pc << std::endl;
+	    std::cout << std::hex << "PC: " << (uint)pc << "\tSP: " << (uint)sp << std::endl;
         std::cout << std::hex << "opcode: " << (uint)opcode << std::endl;
         std::bitset<8> x(*F);
         std::cout << "Flags: " << x << std::endl;
@@ -163,6 +163,9 @@ void GBC::execute(uint8_t opcode)
             break;
     }
 
+    if(memory[0xFF02] == 0x81)
+        std::cout << char(memory[0xFF01]);
+
     timing();
     interrupt_handler();
 }
@@ -174,14 +177,16 @@ void GBC::interpret_bits(uint8_t opcode)
     uint8_t high_nibble = opcode >> 4;
     uint8_t low_nibble = opcode & 0xF;
 
-    uint8_t& r = *(registers[low_nibble - 0x8]);
-
     switch(high_nibble)
     {
         case 0x3:
-            cycles += (low_nibble == 0x6) ? 15 : 8;
-            r = (r << 4) + (r >> 4);
-            break;
+            if(low_nibble < 0x8)
+            {
+                cycles += (low_nibble == 0x6) ? 15 : 8;
+                uint8_t& r = *(registers[low_nibble]);
+                r = (r << 4) + (r >> 4);
+                break;
+            }
         default:
             Z80::interpret_bits(opcode);
             break;

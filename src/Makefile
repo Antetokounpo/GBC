@@ -9,6 +9,11 @@ OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 LIBS=-lSDL2
 
+all: dist/gbemu
+
+debug: CFLAGS += -DGBC_DEBUG -g
+debug: dist/gbemu
+
 $(ODIR)/%.o: %.cpp $(DEPS)
 	@mkdir -p $(@D)
 	$(CC) -c -o $@ $< $(CFLAGS)
